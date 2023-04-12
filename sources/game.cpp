@@ -1,3 +1,4 @@
+//get help from roy Simanovich
 #include <stdexcept>
 #include <algorithm>
 #include <random>
