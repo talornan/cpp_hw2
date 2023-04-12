@@ -44,7 +44,9 @@ namespace ariel
                 ++takencards;
             }
 
-            void addCardToHand(Card& card);
+            void addCardToHand(Card& card) {
+                hand.push_back(card);
+            }
 
             Card& takeCard();
 

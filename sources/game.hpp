@@ -30,7 +30,7 @@ namespace ariel
             void printWiner() const;
 
             void printLastTurn() const {
-                cout << lastTurn << endl;
+                cout << lastTurn;
             }
 
             void printLog() const {

@@ -59,6 +59,7 @@ namespace ariel
         Card &c2 = this->player2.takeCard();
 
         int onTable = 2;
+        int draws = 0;
 
         this->lastTurn = this->player1.getName() + " played " + c1.toString() + " and " 
                         + this->player2.getName() + " played " + c2.toString() + ". ";
@@ -86,6 +87,7 @@ namespace ariel
             c2 = this->player2.takeCard();
 
             onTable += 4;
+            draws++;
 
             this->lastTurn += this->player1.getName() + " played " + c1.toString() + " and " 
                         + this->player2.getName() + " played " + c2.toString() + ". ";
@@ -100,6 +102,8 @@ namespace ariel
                 onTable--;
                 this->player1.updateTakenCards();
             }
+
+            this->p1wins++;
         }
 
         else if (c1 < c2)
@@ -111,11 +115,14 @@ namespace ariel
                 onTable--;
                 this->player2.updateTakenCards();
             }
+
+            this->p2wins++;
         }
 
         else
             this->lastTurn += "Draw!\n";
 
+        this->totaldraws = draws;
         this->log += this->lastTurn;
 
         if (!this->player1.stacksize() || !this->player2.stacksize())
