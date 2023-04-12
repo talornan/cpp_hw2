@@ -6,84 +6,50 @@
 #include "card.hpp"
 
 using namespace std;
-using std :: string;
-using std :: vector;
 
 namespace ariel
 {
     class Player
     {
         private:
-            vector <Card> cards;
-            vector <Card> winCards;
-            size_t cardsPTake;
-            bool playsNow;
+            string plrName;
+            vector<Card> hand;
+            int takencards;
+            bool isInGame;
 
         public:
-            string name;        
-        
-            Player(string name = "guest");
+            Player(string name = "Bobby Botten");
 
-            size_t stacksize()const {
-                return this->cards.size();
+            int stacksize() const {
+                return (int)hand.size();
             }
-            
+
             int cardesTaken() const {
-                return this->cardsPTake;
+                return takencards;
             }
 
-            bool GetPlayerStatus()const {
-                return this->playsNow;
+            bool isPlrInGame() const {
+                return isInGame;
             }
 
-            void setPlayerStatus(bool ans){
-                this->playsNow = ans;
+            void setInGame(bool st) {
+                isInGame = st;
             }
-          
+
             string getName() const {
-                return this->name;
-            }
-            void setName(string namep){
-                this->name = namep;
+                return plrName;
             }
 
-            void increaseCardesTake(){
-                this->cardsPTake++;
+            void updateTakenCards() {
+                ++takencards;
             }
-            void addCard(Card &card);
-           
-            void removeCard(){
-                this->cards.pop_back();
-            }
-            
-            bool operator == (const Player &rhs) const {
-                return this->name == rhs.name;
-            }
-            
 
-            bool hasCard(Card card) const;
+            void addCardToHand(Card& card);
 
-            /*
-             * Returns a string representation of the player.
-             * @return A string representation of the player.
-             * @note The function is const and can be called on a const object.
-             * @note The function is inline.
-            */
+            Card& takeCard();
+
             string toString() const {
-                return "Player " + this->name + " has " + to_string(this->stacksize()) + " cards in hand and " + to_string(this->cardesTaken()) + " cards taken.";
+                return "Player " + plrName + " has " + to_string(stacksize()) + " cards in hand and " + to_string(cardesTaken()) + " taken cards.";
             }
-
-            void placeTop(Card c)
-            {
-                //Insert the card at the beginning of the deck
-                cards.insert(cards.begin(), c);
-            }
-
-            void placeBottom(Card c)
-            {
-                cards.push_back(c);
-            }
-
-            };
-            
-    }
+    };
+}

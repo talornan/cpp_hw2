@@ -1,195 +1,168 @@
-
-#include <iostream>
 #include <stdexcept>
+#include <algorithm>
+#include <random>
+#include <cstdlib>
 #include "game.hpp"
 
-using namespace std;
+namespace ariel
+{
+    Game::Game(Player &firstPlr, Player &secondPlr) : player1(firstPlr), player2(secondPlr), winer(nullptr), turn(0), totaldraws(0), p1wins(0), p2wins(0)
+    {
+        if (this->player1.isPlrInGame() || this->player2.isPlrInGame())
+            throw invalid_argument("One of the player is already in game!");
 
-namespace ariel {
+        vector<Card> cards;
 
-Game::Game(Player& p1, Player& p2) : Player1(p1), Player2(p2) 
-,timesOfWinP1 = 0,timesOfWinP2 = 0 , gameLog = "" 
-, lastTurnStatus = "", turn = 1 , timeOfDrow = 0 {
-       
-        if (p1 == p2)
-            throw invalid_argument("Player 1 and Player 2 are the same player!");         
-       
-        if (p1.isInGame())
-            throw invalid_argument("Player 1 is already in a game!");
+        this->player1.setInGame(true);
+        this->player2.setInGame(true);
 
-        if (p2.isInGame())
-            throw invalid_argument("Player 2 is already in a game!");
+        for (int i = 0; i < 14; i++)
+            cards.push_back(Card(Clubs, (Value)i));
 
-    
-        initialize_deck();
-        shuffle_deck();
-        deal_cards();
-   
-        p1.setPlayerStatus (true); 
-        p1.setPlayerStatus (true); 
+        for (int i = 0; i < 14; i++)
+            cards.push_back(Card(Diamonds, (Value)i));
 
-}
+        for (int i = 0; i < 14; i++)
+            cards.push_back(Card(Hearts, (Value)i));
 
-void playTurn() { 
-     if (p1.isInGame() && p2.isInGame())
+        for (int i = 0; i < 14; i++)
+            cards.push_back(Card(Spades, (Value)i));
+
+        unsigned seed = (unsigned) time(NULL);
+        auto rng = default_random_engine(seed);
+        shuffle(cards.begin(), cards.end(), rng);
+
+        for (int i = 0; i < 52; i++)
         {
-            if (++this->turn > 26)
-                throw logic_error("Game cannot continue with more than 26 turns!");
+            if (i % 2 == 0)
+                this->player1.addCardToHand(cards.back());
 
-            unsigned int drawsinthisturn = 0;
-            this->lastTurnStats = "";
+            else
+                this->player2.addCardToHand(cards.back());
 
-            Card p1Card = p1.getCard();
-            Card p2Card = p2.getCard();
-            p1.removeCard();
-            p2.removeCard();
-
-            cout << p1.getName() << " played " << p1Card.toString() << " " << p2.getName() << " played " << p2Card.toString() << ". ";
-            this->lastTurnStats = "Turn " + to_string(this->turn) + ":\n" + p1.getName() + " played " + p1Card.toString() + " " + p2.getName() + " played " + p2Card.toString() + ". ";
-
-    }
-     while (p1Card == p2Card)
-            {
-                war ();
-            }
-            if(p1.cards.value < p2.cards.value ){
-
-
-            }
-            if (p2.cards.value < p1.cards.value){
-
-            }
-            is_game_over();
-            this->gameLog += this->lastTurnStats;
-
-    else{
-        throw logic_error("Game is over!");
-    }        
-}
-
-void Game::initialize_deck() {
-    for (int i = 1; i < 14; i++) {
-        deck.push_back(Card(i, Suit::Hearts));
-        deck.push_back(Card(i, Suit::Diamonds));
-        deck.push_back(Card(i, Suit::Clubs));
-        deck.push_back(Card(i, Suit::Spades));
-    }
-}
-//A function that shuffles the deck.
-void Game::shuffle_deck() {
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(deck.begin(), deck.end(), g);
-}
-
-// This function is responsible for dealing the cards to each player at the start of the game.
-void Game::deal_cards() {
-    for (int i = 0; i < deck.size(); i++) {
-        players[i % num_players].add_card(deck[i]);
-    }
-}
-
-//This function checks if the game is over by examining the state of the game board. 
-//It takes no input parameters and returns a boolean value.
-bool Game::is_game_over() {
-    for (const auto& player : players) {
-        if (player.get_num_cards() == 0) {
-            return true;
+            cards.pop_back();
         }
     }
-    return false;
-}
 
-
-int Game ::war()
-{
-	Card p1Card, p2Card;
-	int winner = 0;
-
-	do
-	{
-		cout << "WAR!!" << endl;
-		
-		//If a player is out of cards, then SHUFFLE THE CARDS HE HAVE AND TAKE ON OF THEM
-		if (player1.empty())
-		{
-			cout << nameP1 << " is out of cards." << endl;
-			winner = 2;
-			break;
-		}
-		else if (player2.empty())
-		{
-			cout << nameP2 << " is out of cards." << endl;
-			winner = 1;
-			break;
-		}
-
-		//Put down three extra cards for each player
-		for (int i = 0; i < 3; i++)
-		{
-			//Save one card for the comparison
-			if (player1.size() > 1) warPile.placeBottom(player1.drawTop());
-			if (player2.size() > 1) warPile.placeBottom(player2.drawTop());
-		}
-		
-		//We'll compare the next two cards
-		p1Card = player1.drawTop();
-		p2Card = player2.drawTop();
-		warPile.placeBottom(p1Card);
-		warPile.placeBottom(p2Card);
-		
-		printCards(p1Card.name(), p2Card.name());
-	} while (p1Card.getValue() == p2Card.getValue());
-	
-	//Give the spoils to the winner
-	if (p1Card.getValue() > p2Card.getValue() || winner == 1)
-	{
-		int pile_size = warPile.size();
-		for (int i = 0; i < pile_size; i++)
-			player1.placeBottom(warPile.drawTop());
-		
-		winner = 1;
-	}
-	else if (p2Card.getValue() > p1Card.getValue() || winner == 2)
-	{
-		int pile_size = warPile.size();
-		for (int i = 0; i < pile_size; i++)
-			player2.placeBottom(warPile.drawTop());
-		
-		winner = 2;
-	}
-
-	return winner;
-}
-
-
-}
-
-void printLastTurn() { 
-}
-
-void playAll() { 
-    while (this->Player1.GetPlayerStatus() == true and this->Player2.GetPlayerStatus() == true)
+    void Game::playTurn()
     {
-        playTurn();
+        if (&this->player1 == &this->player2)
+            throw invalid_argument("Player 1 and player 2 are the same player!");
+
+        else if (!this->player1.isPlrInGame() || !this->player2.isPlrInGame())
+            throw logic_error("Game is already finished!");
+
+        else if (++this->turn > 26)
+            throw logic_error("Game can't continue with more then 26 turns!");
+
+        Card &c1 = this->player1.takeCard();
+        Card &c2 = this->player2.takeCard();
+
+        int onTable = 2;
+
+        this->lastTurn = this->player1.getName() + " played " + c1.toString() + " and " 
+                        + this->player2.getName() + " played " + c2.toString() + ". ";
+
+        while (c1 == c2)
+        {
+            this->lastTurn += "Draw!\n";
+
+            if (this->player1.stacksize() <= 1 || this->player2.stacksize() <= 1)
+            {
+                while (onTable > 0)
+                {
+                    onTable -= 2;
+                    this->player1.updateTakenCards();
+                    this->player2.updateTakenCards();
+                }
+
+                break;
+            }
+
+            this->player1.takeCard();
+            this->player2.takeCard();
+
+            c1 = this->player1.takeCard();
+            c2 = this->player2.takeCard();
+
+            onTable += 4;
+
+            this->lastTurn += this->player1.getName() + " played " + c1.toString() + " and " 
+                        + this->player2.getName() + " played " + c2.toString() + ". ";
+        }
+
+        if (c2 < c1)
+        {
+            this->lastTurn += this->player1.getName() + " won!\n";
+
+            while (onTable > 0)
+            {
+                onTable--;
+                this->player1.updateTakenCards();
+            }
+        }
+
+        else if (c1 < c2)
+        {
+            this->lastTurn += this->player2.getName() + " won!\n";
+
+            while (onTable > 0)
+            {
+                onTable--;
+                this->player2.updateTakenCards();
+            }
+        }
+
+        else
+            this->lastTurn += "Draw!\n";
+
+        this->log += this->lastTurn;
+
+        if (!this->player1.stacksize() || !this->player2.stacksize())
+        {
+            this->player1.setInGame(false);
+            this->player2.setInGame(false);
+
+            if (this->player1.cardesTaken() > this->player2.cardesTaken())
+                this->winer = &this->player1;
+
+            else
+                this->winer = &this->player2;
+        }
     }
-    
+
+    void Game::playAll()
+    {
+        while (this->player1.stacksize() > 0 && this->player2.stacksize() > 0)
+            this->playTurn();    
+    }
+
+    void Game::printWiner() const
+    {
+        if (this->winer == nullptr)
+            cout << "No winner yet!" << endl;
+
+        else
+            cout << "The winner is " << this->winer->getName() << endl;
+    }
+
+    void Game::printStats() const
+    {
+        cout << this->player1.getName() << " stats:\n" <<
+                "Win rate: " << ((float) this->p1wins / this->turn) <<
+                "\nCards won: " << this->player1.cardesTaken() <<
+                "\nStack size: " << this->player1.stacksize() <<
+                endl;
+
+        cout << this->player2.getName() << " stats:\n" <<
+                "Win rate: " << ((float) this->p2wins/ this->turn) <<
+                "\nCards won: " << this->player2.cardesTaken() <<
+                "\nStack size: " << this->player2.stacksize() <<
+                endl;
+
+        cout << "Draw rate: " << ((float) this->totaldraws / this->turn) <<
+                "\nDraws: " << this->totaldraws <<
+                "\nTurns: " << this->turn <<
+                endl;
+    }
 }
-
-void printWiner() { 
-
-}
-
-void printLog() { 
-    return this.log;
-}
-
-void printStats() {
-
-
-
- }
-
-
-
-

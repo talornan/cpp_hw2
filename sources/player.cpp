@@ -1,33 +1,24 @@
+#include <stdexcept>
 #include "player.hpp"
-#include "game.hpp"
-using namespace std;
 
-namespace ariel {
-    Player::Player(string name) : name(name), cardsPTake(0) ,
-     playsNow(false) {};
+namespace ariel
+{
+    Player::Player(string name): plrName(name), takencards(0), isInGame(false) { }
 
-    bool Player::hasCard(Card card) const {
-        for (size_t i = 0; i < this->stacksize(); ++i)
-        {
-            Card t = this->cards.at(i);
+    void Player::addCardToHand(Card& card) {
+        //if (this->stacksize() >= 26)
+            //throw logic_error("Player already has full stack (26 cards!)");
 
-            if (t.getSuit() == card.getSuit() && t.getValue() == card.getValue())
-                return true;
-        }
-
-        return false;
+        this->hand.push_back(card);
     }
 
-    void Player::addCard(Card& card) { 
-        if (this->hasCard(card))
-            throw invalid_argument("Player already has this card (hand)!");
+    Card& Player::takeCard() {
+        if (this->stacksize() == 0)
+            throw logic_error("Player's stack is empty!");
 
-        this->cards.push_back(card); 
+        Card& ret = this->hand.back();
+        this->hand.pop_back();
+
+        return ret;
     }
 }
-
-            
-
-  
-
-          
